@@ -2,8 +2,13 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { Genders, Slots } from '../constants';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+
+  const navigate=useNavigate();
 
   const initialValues = {
       firstName: '',
@@ -40,10 +45,19 @@ const Home = () => {
   const formik = useFormik({
       initialValues,
       validationSchema,
-      onSubmit: (values, {resetForm, setSubmitting}) => {
-        console.log(values, "values")
-        resetForm()
-        setSubmitting(false)
+      onSubmit: async (values, {resetForm, setSubmitting}) => {
+        try {
+          const response = await axios.post('https://yogaclasses-ocb4.onrender.com/api/v1/', values);
+          console.log('data', response.data);
+          toast.success("Payment is successful")
+          resetForm();
+          navigate('/dashboard')
+        } catch (error) {
+          console.error('request failed:', error);
+          toast.error(`${error}`)
+        } finally {
+          setSubmitting(false);
+        }
       },
   })
 
@@ -182,9 +196,9 @@ const Home = () => {
               ))}
             </select>
           </div>
-          {formik.touched.slot && formik.errors.slot && (
-            <div className='flex items-center ml-[10%]'>
-                <div className='text-red-500 text-sm'>{formik.errors.slot}</div>
+          {formik.touched.gender && formik.errors.gender && (
+            <div className='flex items-center ml-[15%]'>
+                <div className='text-red-500 text-sm'>{formik.errors.gender}</div>
             </div>
           )}
         </div>
